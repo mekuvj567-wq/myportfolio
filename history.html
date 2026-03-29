@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diet History | DietDash AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            margin:0; font-family: 'Inter', sans-serif; 
+            background: #f8fafc; display: flex; 
+        }
+        .sidebar { width: 260px; height: 100vh; background: #1b4332; color: white; position: fixed; padding: 30px 20px; }
+          .logo { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px; }
+        .main-content { margin-left: 260px; margin-bottom: 20vh; padding: 50px; width: 100%; }
+          .nav-link { padding: 10px; margin-bottom: 20px; cursor: pointer; border-radius: 12px; transition: 0.3s; display: flex; align-items: center; }
+        .nav-link:hover, .nav-link.active { background: var(--accent); transform: translateX(5px); }
+        h1 { font-family: 'Playfair Display', serif; color: #1b4332; font-size: 32px; }
+        
+        /* History Grid */
+        .history-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); 
+            gap: 25px; margin-top: 30px; 
+        }
+
+        /* Card Design */
+        .history-card {
+            background: white; padding: 25px; border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #e2e8f0; transition: 0.3s;
+            position: relative;
+        }
+        .history-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        
+        .date-tag { font-size: 12px; color: #64748b; font-weight: 600; text-transform: uppercase; }
+        .goal-badge { 
+            background: #ecfdf5; color: #059669; padding: 4px 10px; 
+            border-radius: 20px; font-size: 12px; font-weight: 600;
+        }
+        .plan-preview { font-size: 14px; color: #334155; margin-top: 15px; line-height: 1.5; }
+        
+        .delete-btn {
+            position: absolute; top: 15px; right: 15px;
+            background: #fee2e2; color: #ef4444; border: none;
+            padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo">DietDash AI</div>
+        <div class="nav-link" onclick="location.href='dashboard.html'">🏠 Dashboard</div>
+        <div class="nav-link active">📜 History</div>
+        <div class="nav-link" onclick="location.href='calender.html'">📅 Meal Plan</div>
+        <div class="nav-link"onclick="location.href='profile.html'" style="margin-top: 30vh" style="margin-bottom: 10vh">👤 Profile</div>
+        <div class="nav-link"  onclick="location.href='/login'">🚪 Logout</div>
+    </div>
+
+    <div class="main-content">
+        <h1>Your Diet Journey 📜</h1>
+        <p>A look back at your personalized plans.</p>
+
+        <div class="history-grid" id="historyContainer">
+            <p>Loading your history...</p>
+        </div>
+    </div>
+
+    <script>
+        async function loadHistory() {
+            const res = await fetch('/get-history');
+            const data = await res.json();
+            const container = document.getElementById('historyContainer');
+            container.innerHTML = "";
+
+            data.forEach(item => {
+                const date = new Date(item.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+                container.innerHTML += `
+                    <div class="history-card">
+                        <button class="delete-btn" onclick="deletePlan('${item._id}')">🗑️</button>
+                        <span class="date-tag">${date}</span>
+                        <span class="goal-badge">${item.goal}</span>
+                        <div class="plan-preview">
+                            ${item.plan.substring(0, 150)}...
+                        </div>
+                        <button style="margin-top:15px; background:none; border:1px solid #1b4332; color:#1b4332; padding:8px 12px; border-radius:8px; cursor:pointer;" onclick="alert(\`${item.plan}\`)">View Full Plan</button>
+                    </div>
+                `;
+            });
+        }
+
+        async function deletePlan(id) {
+            if(confirm("Delete kar dein?")) {
+                await fetch(`/delete-diet/${id}`, { method: 'DELETE' });
+                loadHistory();
+            }
+        }
+
+        loadHistory();
+    </script>
+</body>
+</html>

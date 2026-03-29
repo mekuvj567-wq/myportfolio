@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DietDash AI | Official Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root { --primary: #2d6a4f; --accent: #52b788; --glass: rgba(255, 255, 255, 0.9); }
+        body { 
+            margin: 0; font-family: 'Inter', sans-serif; 
+            background-size: cover; display: flex; 
+        }
+
+        /* Sidebar */
+        .sidebar { width: 260px; height: 100vh; background: #1b4332; backdrop-filter: blur(10px); color: white; position: fixed; padding: 30px 20px; box-sizing: border-box; z-index: 100; }
+        .logo { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px; }
+        .nav-link { padding: 10px; margin-bottom: 20px; cursor: pointer; border-radius: 12px; transition: 0.3s; display: flex; align-items: center; }
+        .nav-link:hover, .nav-link.active { background: var(--accent); transform: translateX(5px); }
+
+        /* Main Area */
+        .main-container { margin-left: 260px; width: calc(100% - 260px); padding: 40px; box-sizing: border-box; min-height: 100vh; background: rgba(255,255,255,0.1); backdrop-filter: blur(2px); }
+        .header h2 { font-family: 'Playfair Display', serif; font-size: 38px; color: #1b4332; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        /* Cards */
+        .card { background: var(--glass); padding: 25px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 25px; border: 1px solid rgba(255,255,255,0.5); }
+        .mood-btn { background: white; border: 1px solid #d8f3dc; padding: 10px 20px; border-radius: 50px; cursor: pointer; transition: 0.3s; margin-right: 10px; }
+        .mood-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* AI Promo */
+        .ai-promo { background: linear-gradient(135deg, #1b4332, #2d6a4f); color: white; padding: 40px; border-radius: 30px; text-align: center; box-shadow: 0 15px 35px rgba(27, 67, 50, 0.4); }
+        .btn-magic { background: #b7e4c7; color: #1b4332; border: none; padding: 15px 40px; border-radius: 50px; font-size: 18px; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 15px; }
+        .btn-magic:hover { transform: scale(1.05); background: white; }
+
+        /* Modal */
+        .modal { display: none; position: fixed; z-index: 1000; left:0; top:0; width:100%; height:100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); }
+        .modal-content { background: white; margin: 5% auto; padding: 40px; width: 500px; border-radius: 35px; max-height: 80vh; overflow-y: auto; text-align: center; position: relative; }
+        input, select { width: 100%; padding: 15px; margin: 10px 0; border-radius: 12px; border: 1px solid #ddd; background: #f9f9f9; font-size: 16px; }
+
+        /* Result Area */
+        #dietResult { text-align: left; margin-top: 20px; padding: 20px; background: #f4fdf4; border-radius: 20px; display: none; line-height: 1.6; }
+        .bar-wrap { height: 10px; background: #eee; border-radius: 10px; margin: 5px 0 15px 0; overflow: hidden; }
+        .bar-fill { height: 100%; transition: 1.5s ease-in-out; width: 0%; }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="logo">DietDash AI</div>
+        <div class="nav-link active">🏠 Dashboard</div>
+        <div class="nav-link" onclick="location.href='history.html'">📜 History</div>
+        <div class="nav-link">📅 Meal Plan</div>
+        <div class="nav-link" style="margin-top: 30vh" style="margin-bottom: 10vh">👤 Profile</div>
+        <div class="nav-link"  onclick="location.href='/login'">🚪 Logout</div>
+    </div>
+
+    <div class="main-container">
+        <div class="header">
+            <h2 id="welcomeName">Welcome back! ✨</h2>
+            <p style="color: #2d6a4f; font-weight: 500;">Your personalized health journey continues here.</p>
+        </div>
+
+        <div class="card">
+            <p style="font-weight: 600; color: #1b4332; margin-bottom: 15px;">How's your energy right now?</p>
+            <button class="mood-btn" onclick="setMood(this, 'Energetic')">🤩 High</button>
+            <button class="mood-btn" onclick="setMood(this, 'Tired')">🥱 Low</button>
+            <button class="mood-btn" onclick="setMood(this, 'Calm')">🧘 Balanced</button>
+        </div>
+
+        <div class="ai-promo">
+            <h2>✨ AI Diet Generator</h2>
+            <p>Get a custom 1-day meal plan based on your stats and current mood.</p>
+            <button class="btn-magic" onclick="openModal()">Generate My Plan 🪄</button>
+        </div>
+    </div>
+
+    <div id="dietModal" class="modal">
+        <div class="modal-content">
+            <h2 style="font-family: 'Playfair Display'; font-size: 30px;">Refine Your Stats</h2>
+            <input type="number" id="age" placeholder="Your Age">
+            <input type="number" id="weight" placeholder="Weight (kg)">
+            <select id="goal">
+                <option value="Weight Loss">Goal: Weight Loss</option>
+                <option value="Muscle Gain">Goal: Muscle Gain</option>
+                <option value="Healthy Living">Goal: Healthy Living</option>
+            </select>
+            <button class="btn-magic" style="width:100%" onclick="fetchAIDiet()">Generate Magic Plan ✨</button>
+
+            <div id="chartSection" style="display:none; text-align: left; margin-top: 20px;">
+                <p style="margin:0">Protein</p><div class="bar-wrap"><div id="pBar" class="bar-fill" style="background:#2196F3;"></div></div>
+                <p style="margin:0">Carbs</p><div class="bar-wrap"><div id="cBar" class="bar-fill" style="background:#4CAF50;"></div></div>
+                <p style="margin:0">Fats</p><div class="bar-wrap"><div id="fBar" class="bar-fill" style="background:#FFC107;"></div></div>
+            </div>
+
+            <div id="dietResult"></div>
+            <p style="color:red; cursor:pointer; margin-top:20px;" onclick="closeModal()">Close Window</p>
+        </div>
+    </div>
+
+    <script>
+        // 1. Setup Data
+        let selectedMood = "Balanced";
+        const name = localStorage.getItem('userName') || 'User';
+        document.getElementById('welcomeName').innerText = `Welcome back, ${name}! ✨`;
+
+        function setMood(btn, mood) {
+            document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedMood = mood;
+        }
+
+        function openModal() { document.getElementById('dietModal').style.display = 'block'; }
+        function closeModal() { document.getElementById('dietModal').style.display = 'none'; }
+
+        // 2. The Asynchronous Magic (Gemini Call)
+        async function fetchAIDiet() {
+            const age = document.getElementById('age').value;
+            const weight = document.getElementById('weight').value;
+            const goal = document.getElementById('goal').value;
+            const resultDiv = document.getElementById('dietResult');
+            const chart = document.getElementById('chartSection');
+
+            if(!age || !weight) return alert("Please fill all details!");
+
+            resultDiv.style.display = "block";
+            resultDiv.innerHTML = "✨ AI is cooking your plan (based on your " + selectedMood + " mood)...";
+
+            try {
+                const response = await fetch('/generate-diet', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ age, weight, goal, mood: selectedMood })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.innerHTML = `<h3>Your 1-Day Plan:</h3>${data.plan.replace(/\n/g, '<br>')}`;
+                    
+                    // Show Chart and Fill Bars (Animate)
+                    chart.style.display = "block";
+                    setTimeout(() => {
+                        document.getElementById('pBar').style.width = "30%";
+                        document.getElementById('cBar').style.width = "50%";
+                        document.getElementById('fBar').style.width = "20%";
+                    }, 500);
+                } else {
+                    resultDiv.innerHTML = "❌ Error: " + data.error;
+                }
+            } catch (err) {
+                resultDiv.innerHTML = "❌ Server not responding. Check your Node.js console.";
+            }
+        }
+    </script>
+</body>
+</html>

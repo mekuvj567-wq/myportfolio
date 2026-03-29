@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Diet Calendar | DietDash AI</title>
+    <style>
+        :root { --primary: #1b4332; --bg: #f8fafc; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); display: flex; }
+        
+        .sidebar { width: 250px; height: 100vh; background: var(--primary); color: white; position: fixed; padding: 30px; }
+        .logo { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px; }
+        .main { margin-left: 250px; padding: 40px; width: 100%; }
+        .nav-link { padding: 10px; margin-bottom: 20px; cursor: pointer; border-radius: 12px; transition: 0.3s; display: flex; align-items: center; }
+        .nav-link:hover, .nav-link.active { background: var(--accent); transform: translateX(5px); }
+          h1 { font-family: 'Playfair Display', serif;padding-left:25px; color: #1b4332; font-size: 32px; }
+
+        /* Calendar Grid */
+        .calendar-container {
+            background: white; border-radius: 20px; padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 800px;
+        }
+        .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-left:20px; }
+        
+        .days-grid { 
+            display: grid; grid-template-columns: repeat(7, 1fr); 
+            gap: 10px; text-align: center; 
+        }
+        .day-name { font-weight: 600; color: #64748b; font-size: 13px; padding-bottom: 10px; }
+        
+        .date-box { 
+            aspect-ratio: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            border-radius: 12px; border: 1px solid #f1f5f9;
+            cursor: pointer; transition: 0.2s; font-size: 14px;
+        }
+        .date-box:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .has-plan { background: #dcfce7; border-color: #86efac; position: relative; }
+        .has-plan::after { 
+            content: ''; width: 5px; height: 5px; background: #22c55e; 
+            border-radius: 50%; position: absolute; bottom: 8px; 
+        }
+
+        /* Detail Area */
+        #dayDetail {
+            margin-top: 30px; background: white; padding: 25px;
+            border-radius: 20px; border-left: 5px solid var(--primary);
+            display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        }
+    </style>
+</head>
+<body>
+
+   <div class="sidebar">
+        <div class="logo">DietDash AI</div>
+        <div class="nav-link" onclick="location.href='dashboard.html'">🏠 Dashboard</div>
+        <div class="nav-link"onclick="location.href='history.html'">📜 History</div>
+        <div class="nav-link active" >📅 Meal Plan</div>
+        <div class="nav-link" onclick="location.href='profile.html'" style="margin-top: 30vh" style="margin-bottom: 10vh">👤 Profile</div>
+        <div class="nav-link" onclick="location.href='/login'">🚪 Logout</div>
+    </div>
+
+    <div class="main">
+        <h1 style="color: var(--primary)";margin-left:20vh;>Your Progress Calendar 📅</h1>
+        
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <h3 id="monthYear">March 2026</h3>
+            </div>
+            <div class="days-grid" id="calendarGrid">
+                <div class="day-name">Sun</div><div class="day-name">Mon</div>
+                <div class="day-name">Tue</div><div class="day-name">Wed</div>
+                <div class="day-name">Thu</div><div class="day-name">Fri</div>
+                <div class="day-name">Sat</div>
+                </div>
+        </div>
+
+        <div id="dayDetail">
+            <h3 id="selectedDateText" style="margin-top:0">Plan for March 28</h3>
+            <div id="planContent" style="line-height:1.6; color:#334155;"></div>
+        </div>
+    </div>
+
+    <script>
+   async function renderCalendar() {
+    const grid = document.getElementById('calendarGrid');
+    const monthDisplay = document.getElementById('monthYear');
+    
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    // Month Name Set Karo
+    const monthName = now.toLocaleString('default', { month: 'long' });
+    monthDisplay.innerText = `${monthName} ${currentYear}`;
+
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay();
+
+    // History Fetch Karo (Safe way)
+    let historyData = [];
+    try {
+        const res = await fetch('/get-history');
+        historyData = await res.json();
+    } catch (e) {
+        console.log("History abhi khali hai, par dates dikhayenge!");
+    }
+
+    // Grid saaf karo (Sirf names bachne chahiye)
+    // Pehle names wale div dalo
+    grid.innerHTML = `
+        <div class="day-name">Sun</div><div class="day-name">Mon</div>
+        <div class="day-name">Tue</div><div class="day-name">Wed</div>
+        <div class="day-name">Thu</div><div class="day-name">Fri</div>
+        <div class="day-name">Sat</div>
+    `;
+    
+    // Khali gaps dalo
+    for (let x = 0; x < firstDayIndex; x++) {
+        grid.innerHTML += `<div class="date-box" style="border:none; cursor:default;"></div>`;
+    }
+
+    // Dates generate karo
+    for (let i = 1; i <= daysInMonth; i++) {
+        const dateBox = document.createElement('div');
+        dateBox.className = 'date-box';
+        dateBox.innerText = i;
+
+        // Aaj ki date highlight karne ke liye (Optional par acha lagta hai)
+        if(i === now.getDate()) {
+            dateBox.style.border = "2px solid #1b4332";
+            dateBox.style.fontWeight = "bold";
+        }
+
+        // Match with history
+        const hasPlan = Array.isArray(historyData) && historyData.find(item => {
+            const d = new Date(item.createdAt);
+            return d.getDate() === i && d.getMonth() === currentMonth;
+        });
+
+        if (hasPlan) {
+            dateBox.classList.add('has-plan');
+            dateBox.onclick = () => showPlan(i, hasPlan.plan);
+        } else {
+            dateBox.onclick = () => alert(`Day ${i}: No diet plan generated yet.`);
+        }
+
+        grid.appendChild(dateBox);
+    }
+}
+
+// 🔥 SABSE IMPORTANT LINE: Isey likhna mat bhulna!
+renderCalendar();
+    </script>
+</body>
+</html>

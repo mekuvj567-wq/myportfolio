@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Profile | DietDash AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1b4332; --bg: #f8fafc; }
+        body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); display: flex; }
+        
+       .sidebar { width: 260px; height: 100vh; background: #1b4332; color: white; position: fixed; padding: 30px 20px; }
+           .logo { font-family: 'Playfair Display', serif; font-size: 28px; margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px; }
+        .main{ margin-left: 360px; margin-bottom: 20vh; padding: 50px; width: 100%; }
+          .nav-link { padding: 10px; margin-bottom: 20px; cursor: pointer; border-radius: 12px; transition: 0.3s; display: flex; align-items: center; }
+        .nav-link:hover, .nav-link.active { background: var(--accent); transform: translateX(5px); }
+
+        .profile-card {
+            background: white; width: 100%; max-width: 600px;
+            border-radius: 24px; padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+            text-align: center; border: 1px solid #f1f5f9;
+        }
+
+        /* Profile Avatar */
+        .avatar {
+            width: 100px; height: 100px; background: #dcfce7;
+            color: var(--primary); font-size: 40px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; margin: 0 auto 20px;
+            border: 4px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+
+        h1 { font-family: 'Playfair Display', serif; color: #1e293b; margin: 10px 0; font-size: 28px; }
+        .location { color: #64748b; font-size: 14px; margin-bottom: 30px; }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 40px; }
+        .stat-box {
+            background: #f8fafc; padding: 20px; border-radius: 16px;
+            border: 1px solid #e2e8f0;
+        }
+        .stat-val { display: block; font-size: 18px; font-weight: 600; color: var(--primary); }
+        .stat-label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* Buttons */
+        .btn-edit {
+            background: var(--primary); color: white; border: none;
+            padding: 12px 30px; border-radius: 10px; cursor: pointer;
+            font-weight: 500; transition: 0.3s; width: 100%; margin-bottom: 10px;
+        }
+        .btn-logout {
+            background: white; color: #ef4444; border: 1px solid #fee2e2;
+            padding: 12px 30px; border-radius: 10px; cursor: pointer;
+            width: 100%; font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+ <div class="sidebar">
+        <div class="logo">DietDash AI</div>
+        <div class="nav-link" onclick="location.href='dashboard.html'">🏠 Dashboard</div>
+        <div class="nav-link" onclick="location.href='history.html'">📜 History</div>
+        <div class="nav-link" onclick="location.href='calender.html'">📅 Meal Plan</div>
+        <div class="nav-link active" style="margin-top: 30vh" style="margin-bottom: 10vh">👤 Profile</div>
+        <div class="nav-link"  onclick="location.href='/login'">🚪 Logout</div>
+    </div>
+    
+
+    <div class="main">
+        <div class="profile-card">
+            <div class="avatar">M</div>
+            <h1>Mehak Vij</h1>
+            <div class="location">📍 Ludhiana, India</div>
+
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-val">25</span>
+                    <span class="stat-label">Age</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-val">-- kg</span>
+                    <span class="stat-label">Weight</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-val">Goal</span>
+                    <span class="stat-label">Weight Loss</span>
+                </div>
+            </div>
+
+            <button class="btn-edit" onclick="location.href='/dashboard'">Update Stats ✨</button>
+            <button class="btn-logout" onclick="alert('Logging out...')">Logout</button>
+        </div>
+    </div>
+
+</body>
+</html>
